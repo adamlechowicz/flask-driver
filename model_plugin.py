@@ -23,7 +23,7 @@ import time
 import subprocess
 
 MAX_EXECS = 4
-PATH_TO_RESOURCE_QUOTA = "/Users/adam/GitHub/cap-k8s/resource_quota.yaml"
+PATH_TO_RESOURCE_QUOTA = "../cap-k8s/resource_quota.yaml"
 executors = [Executor(exec_id) for exec_id in range(MAX_EXECS)]
 sess = None
 agent = None
@@ -62,9 +62,9 @@ def init(name):
 
 # runs the cap agent in background if we're using CAP
 def run_cap_agent():
-    # run the command "/opt/homebrew/Caskroom/miniforge/base/bin/python ~/GitHub/cap-k8s/cap.py --namespace spark-ns --res-quota-path resource_quota.yaml --api-domain 127.0.0.1:6066 --min-execs 4 --max-execs 10 --interval 60"
+    # run the command "python3 ~/GitHub/cap-k8s/cap.py --namespace spark-ns --res-quota-path resource_quota.yaml --api-domain 127.0.0.1:6066 --min-execs 4 --max-execs 10 --interval 60"
     # in the background
-    return subprocess.Popen(["/opt/homebrew/Caskroom/miniforge/base/bin/python", "/Users/adam/GitHub/cap-k8s/cap.py", "--namespace", "spark-ns", "--res-quota-path", "/Users/adam/GitHub/cap-k8s/resource_quota.yaml", "--api-domain", "127.0.0.1:6066", "--min-execs", "4", "--max-execs", "10", "--interval", "60"])
+    return subprocess.Popen(["python3", "../cap-k8s/cap.py", "--namespace", "spark-ns", "--res-quota-path", "../cap-k8s/resource_quota.yaml", "--api-domain", "127.0.0.1:6066", "--min-execs", "4", "--max-execs", "10", "--interval", "60"])
 
 # Update the Kubernetes resource quota
 def update_resource_quota():

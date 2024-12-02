@@ -28,7 +28,7 @@ delayed_thread = None
 # constants
 MAX_EXECS = 4
 # MODEL_NAME = "danish"
-MODEL_NAME = "cap"
+MODEL_NAME = "default"
 INITIAL_DATETIME = datetime.datetime.fromisoformat("2022-01-31T22:00:00")
 ACTUAL_DATETIME = datetime.datetime.now()
 

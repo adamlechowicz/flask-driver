@@ -64,7 +64,7 @@ def init(name):
 def run_cap_agent():
     # run the command "python3 ~/GitHub/cap-k8s/cap.py --namespace spark-ns --res-quota-path resource_quota.yaml --api-domain 127.0.0.1:6066 --min-execs 4 --max-execs 10 --interval 60"
     # in the background
-    return subprocess.Popen(["python3", "../cap-k8s/cap.py", "--namespace", "spark-ns", "--res-quota-path", "../cap-k8s/resource_quota.yaml", "--api-domain", "127.0.0.1:6066", "--min-execs", "4", "--max-execs", "10", "--interval", "60"])
+    return subprocess.Popen(["python3", "/home/cc/cap-k8s/cap.py", "--namespace", "spark-ns", "--res-quota-path", "/home/cc/cap-k8s/resource_quota.yaml", "--api-domain", "127.0.0.1:6066", "--min-execs", "4", "--max-execs", "10", "--interval", "60"])
 
 # Update the Kubernetes resource quota
 def update_resource_quota():

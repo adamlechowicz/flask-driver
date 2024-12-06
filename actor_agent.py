@@ -161,7 +161,7 @@ class ActorAgent(Agent):
         self.saver = tf.compat.v1.train.Saver(max_to_keep=1000)
         self.sess.run(v1.global_variables_initializer())
 
-        self.saver.restore(self.sess, "./models/stream_200_job_diff_reward_reset_5e-7_5e-8/model_ep_10000")
+        self.saver.restore(self.sess, "/home/cc/flask-driver/models/stream_200_job_diff_reward_reset_5e-7_5e-8/model_ep_10000")
 
     def actor_network(self, node_inputs, gcn_outputs, job_inputs,
                       gsn_dag_summary, gsn_global_summary,

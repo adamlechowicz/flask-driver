@@ -10,6 +10,10 @@ import time
 import model_plugin
 import pandas as pd
 import datetime
+import argparse
+import pytz
+
+utc = pytz.UTC
 
 app = Flask(__name__)
 
@@ -26,9 +30,15 @@ moving_executors = 0
 delayed_thread = None
 
 # constants
-MAX_EXECS = 4
-# MODEL_NAME = "danish"
-MODEL_NAME = "default"
+MAX_EXECS = 100
+
+parser = argparse.ArgumentParser(description='Run Flask driver server.')
+parser.add_argument('--model-name', type=str, default="default", help='Scheduler name')
+parser.add_argument('--carbon-trace', type=str, default='PJM.csv', help='Data file for carbon intensity')
+args = parser.parse_args()
+
+MODEL_NAME = args.model_name
+data_file_path = args.carbon_trace
 INITIAL_DATETIME = datetime.datetime.fromisoformat("2022-01-31T22:00:00")
 ACTUAL_DATETIME = datetime.datetime.now()
 
@@ -37,8 +47,11 @@ sorted_app_id = {}
 sorted_stage_prob = {}
 
 # Load the carbon intensity data
-data_file_path = 'us-east-1.csv'  # Replace with the correct path to your CSV file
-carbon_data = pd.read_csv(data_file_path)
+try:
+    carbon_data = pd.read_csv(data_file_path)
+except FileNotFoundError:
+    print(f"Carbon intensity data file not found: {data_file_path}")
+    exit(1)
 carbon_data['datetime'] = pd.to_datetime(carbon_data['datetime'])  # Ensure timestamps are datetime objects
 # make the datetime column the index
 carbon_data.set_index('datetime', inplace=True)
@@ -71,6 +84,7 @@ def reset():
     # Update the MODEL_NAME and initialize the model plugin
     MODEL_NAME = new_model_name
     model_plugin.init(MODEL_NAME)
+    ACTUAL_DATETIME = datetime.datetime.now()
 
     return jsonify({"message": "Environment reset successfully.", "model_name": MODEL_NAME}), 200
 
@@ -134,7 +148,7 @@ def register_job():
 @app.route('/pods', methods=['POST'])
 def pods():
     global jobs, source_job, driver_ports, driver_ports_proc, num_source_exec, exec_commit, app_registry, frontier_nodes, moving_executors
-    global sorted_app_id, sorted_stage_prob
+    global sorted_app_id, sorted_stage_prob, delayed_thread
     if request.data == b'null':
         print("empty request")
         return jsonify({'response': 'empty'})
@@ -238,13 +252,20 @@ def pods():
         print("pausing for carbon intensity")
 
         sorted_pod_names.insert(0, "PAUSE")
-
-        global delayed_thread
         # Check if there is no existing thread or if the existing thread is not alive
         if delayed_thread is None or not delayed_thread.is_alive():
-            # Start a new thread to run the delayed command
-            delayed_thread = threading.Thread(target=delayed_pod_delete)
+            # Start a new thread to run the delayed command, with a delay of 120 seconds
+            delayed_thread = threading.Thread(target=delayed_pod_delete, args=(120))
             delayed_thread.start()
+    elif MODEL_NAME != "default":
+        # with 1% probability, kill the scheduler to keep things moving
+        if random.random() < 0.01:
+            print("restarting kube-scheduler")
+            # Check if there is no existing thread or if the existing thread is not alive
+            if delayed_thread is None or not delayed_thread.is_alive():
+                # Start a new thread to run the delayed command
+                delayed_thread = threading.Thread(target=delayed_pod_delete, args=(30))
+                delayed_thread.start()
     
     if MODEL_NAME == "default":
         sorted_pod_names = ["nothing"]
@@ -318,9 +339,10 @@ def update_from_API(driver_name, port):
     return 
 
 # Define a function to run the command after a delay
-def delayed_pod_delete():
-    time.sleep(60)
-    subprocess.run(['kubectl', 'delete', 'pod', 'kube-scheduler-kind-control-plane', '-n', 'kube-system'])
+# make the time a parameter
+def delayed_pod_delete(delay):
+    time.sleep(delay)
+    subprocess.run(['kubectl', 'delete', 'pod', 'kube-scheduler-node-0', '-n', 'kube-system'])
 
 
 def get_carbon_intensity():
@@ -335,7 +357,13 @@ def get_carbon_intensity():
     elapsed_hours = int(time_delta.total_seconds() // 60)
 
     # Determine the corresponding row in the carbon intensity data
-    carbon_time = INITIAL_DATETIME + datetime.timedelta(hours=elapsed_hours)
+    carbon_time = (INITIAL_DATETIME + datetime.timedelta(hours=elapsed_hours)).replace(tzinfo=utc)
+    # if the carbon time is beyond the last time in the data, reset the ACTUAL_DATETIME (so that we loop back to the beginning of the data)
+    if carbon_time > carbon_data.index[-1]:
+        ACTUAL_DATETIME = current_datetime
+        INITIAL_DATETIME = carbon_data.index[0]
+        carbon_time = INITIAL_DATETIME
+        elapsed_hours = 0
     rounded_time = carbon_time.replace(minute=0, second=0, microsecond=0)  # Round down to the nearest hour
     future_time = rounded_time + datetime.timedelta(hours=48)
     # convert to iso format
@@ -362,4 +390,4 @@ def get_carbon_intensity():
 if __name__ == '__main__':
     # initialize the model_plugin
     model_plugin.init(MODEL_NAME)
-    app.run(host='192.168.1.10', port=14040)
+    app.run(host='127.0.0.1', port=14040)

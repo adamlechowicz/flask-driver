@@ -22,7 +22,7 @@ from danish_actor_agent import DANISHAgent
 import time
 import subprocess
 
-MAX_EXECS = 4
+MAX_EXECS = 100
 PATH_TO_RESOURCE_QUOTA = "../cap-k8s/resource_quota.yaml"
 executors = [Executor(exec_id) for exec_id in range(MAX_EXECS)]
 sess = None

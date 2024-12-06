@@ -390,4 +390,4 @@ def get_carbon_intensity():
 if __name__ == '__main__':
     # initialize the model_plugin
     model_plugin.init(MODEL_NAME)
-    app.run(host='127.0.0.1', port=14040)
+    app.run(host='192.168.1.10', port=14040)

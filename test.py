@@ -346,6 +346,7 @@ def delayed_pod_delete(delay):
 
 
 def get_carbon_intensity():
+    global ACTUAL_DATETIME, INITIAL_DATETIME
     # Calculate the time delta
     current_datetime = datetime.datetime.now()
     time_delta = current_datetime - ACTUAL_DATETIME

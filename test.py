@@ -390,5 +390,11 @@ def get_carbon_intensity():
 
 if __name__ == '__main__':
     # initialize the model_plugin
-    model_plugin.init(MODEL_NAME)
-    app.run(host='192.168.1.10', port=14040)
+    try:
+        model_plugin.init(MODEL_NAME)
+        app.run(host='192.168.1.10', port=14040)
+    except:
+        # kill any remaining port-forwarding processes
+        for proc in driver_ports_proc.values():
+            proc.terminate()
+        print("Exiting...")

@@ -30,7 +30,7 @@ moving_executors = 0
 delayed_thread = None
 
 # constants
-MAX_EXECS = 100
+MAX_EXECS = 50
 
 parser = argparse.ArgumentParser(description='Run Flask driver server.')
 parser.add_argument('--model-name', type=str, default="default", help='Scheduler name')
@@ -254,10 +254,10 @@ def pods():
         sorted_pod_names.insert(0, "PAUSE")
         # Check if there is no existing thread or if the existing thread is not alive
         if delayed_thread is None or not delayed_thread.is_alive():
-            # Start a new thread to run the delayed command, with a delay of 120 seconds
-            delayed_thread = threading.Thread(target=delayed_pod_delete, args=(120))
+            # Start a new thread to run the delayed command, with a delay of 60 seconds
+            delayed_thread = threading.Thread(target=delayed_pod_delete, args=(60))
             delayed_thread.start()
-    elif MODEL_NAME != "default":
+    elif MODEL_NAME != "default" and MODEL_NAME != "decima":
         # with 1% probability, kill the scheduler to keep things moving
         if random.random() < 0.01:
             print("restarting kube-scheduler")

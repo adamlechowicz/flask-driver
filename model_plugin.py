@@ -29,13 +29,9 @@ sess = None
 agent = None
 agent_name = None
 wall_time = None
-cap_agent = None
 
 def init(name):
-    global sess, agent, agent_name, wall_time, cap_agent
-    if cap_agent is not None:
-        # kill the subprocess
-        cap_agent.kill()
+    global sess, agent, agent_name, wall_time
     # set the maximum resource quota to start
     update_resource_quota()
     # initialize WallTime
@@ -56,15 +52,6 @@ def init(name):
     elif name == "cap":
         agent = DANISHAgent(sess, 5, 3, [16, 8], 8, 8, range(1, MAX_EXECS + 1), {0.0: 0})
         agent_name = "cap"
-        # if the agent is cap, run the cap agent in the background
-        print("Running CAP agent in the background")
-        cap_agent = run_cap_agent()
-
-# runs the cap agent in background if we're using CAP
-def run_cap_agent():
-    # run the command "python3 ~/GitHub/cap-k8s/cap.py --namespace spark-ns --res-quota-path resource_quota.yaml --api-domain 127.0.0.1:6066 --min-execs 4 --max-execs 10 --interval 60"
-    # in the background
-    return subprocess.Popen(["python3", "/home/cc/cap-k8s/cap.py", "--namespace", "spark-ns", "--res-quota-path", "/home/cc/cap-k8s/resource_quota.yaml", "--api-domain", "127.0.0.1:6066", "--min-execs", "4", "--max-execs", "10", "--interval", "60"])
 
 # Update the Kubernetes resource quota
 def update_resource_quota():

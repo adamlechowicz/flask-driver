@@ -35,11 +35,12 @@ MAX_EXECS = 50
 parser = argparse.ArgumentParser(description='Run Flask driver server.')
 parser.add_argument('--model-name', type=str, default="default", help='Scheduler name')
 parser.add_argument('--carbon-trace', type=str, default='PJM.csv', help='Data file for carbon intensity')
+parser.add_argument('--initial-date', type=str, default='2022-01-31T22:00:00', help='Initial date for carbon intensity data')
 args = parser.parse_args()
 
 MODEL_NAME = args.model_name
 data_file_path = args.carbon_trace
-INITIAL_DATETIME = datetime.datetime.fromisoformat("2022-01-31T22:00:00")
+INITIAL_DATETIME = datetime.datetime.fromisoformat(args.initial_date)
 ACTUAL_DATETIME = datetime.datetime.now()
 
 # global registry of model outputs

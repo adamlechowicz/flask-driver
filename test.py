@@ -396,5 +396,5 @@ if __name__ == '__main__':
     except:
         # kill any remaining port-forwarding processes
         for proc in driver_ports_proc.values():
-            proc.terminate()
+            proc.kill()
         print("Exiting...")

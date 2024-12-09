@@ -88,6 +88,13 @@ def reset():
 
     return jsonify({"message": "Environment reset successfully.", "model_name": MODEL_NAME}), 200
 
+@app.route('/purge_proc', methods=['GET'])
+def purge_proc():
+    global driver_ports_proc
+    for proc in driver_ports_proc.values():
+        proc.kill()
+    return jsonify({"message": "Port-forwarding processes purged successfully."}), 200
+
 @app.route('/task', methods=['POST'])
 def task():
     global sorted_stage_prob

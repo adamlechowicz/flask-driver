@@ -263,7 +263,7 @@ def pods():
         # Check if there is no existing thread or if the existing thread is not alive
         if delayed_thread is None or not delayed_thread.is_alive():
             # Start a new thread to run the delayed command, with a delay of 60 seconds
-            delayed_thread = threading.Thread(target=delayed_pod_delete, args=(60))
+            delayed_thread = threading.Thread(target=delayed_pod_delete, args=(90))
             delayed_thread.start()
     elif MODEL_NAME != "default" and MODEL_NAME != "decima":
         # with 1% probability, kill the scheduler to keep things moving
